@@ -18,7 +18,7 @@ OLLAMA_MODEL = 'lume2' #your llm model
 # --- Core Paths ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) #path to Lume_project. Will be done automatically
 # path to GPT-SoVITS
-GPT_SOVITS_BASE_PATH = "D:/AI/Lume_ollama/GPT-SoVITS" 
+GPT_SOVITS_BASE_PATH = "" #path to the gpt sovits file
 
 # --- Generated Paths ---
 MEMORY_DB_PATH = os.path.join(SCRIPT_DIR, "memory")
@@ -48,11 +48,8 @@ STT_BEAM_SIZE = 5 #lower = faster but less accurate
 BOT_NAME = "Lume"
 BOT_ALT_NAMES = ["Lume", "Lumi"]# if no alt name, just leave it empty.
 
-USER_NAMES = {
-    "711902618783449118": "Koshy", #For the ai to recognize who it's speaking to via discord id. If none just leave it empty.
-    "524431112089632781": "Zero",
-    "1054415083406626846": "Jo",
-    "1005804595072749598": "Ryvoid"
+USER_NAMES = {#For the ai to recognize who it's speaking to via discord id. If none just leave it empty.
+    "12345678900923": "Koshy", #example
 }
 VIRTUAL_MIC_NAME = "CABLE Input (VB-Audio Virtual Cable)"
 
