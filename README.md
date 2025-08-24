@@ -93,6 +93,10 @@ Next, head down to BASED_PERSONALITY and describe how you want your ai to act (o
 
 *Note*: This is my first time making a repo readme. Excuse the terrible explaination.
 
+# Usage
+Head to the main.py in Lume_project and run it. Once the bot is running. Head to discord and type !help.
+
+
 # Personal Notes
 If you have any problems or want to suggest something, join the discord server. I'll mostly be there.
 
