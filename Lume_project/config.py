@@ -28,7 +28,7 @@ VTS_TOKEN_PATH = os.path.join(SCRIPT_DIR, "vts_token.txt")
 # --- GPT-SoVITS Model Paths ---
 GPT_MODEL_PATH = os.path.join(GPT_SOVITS_BASE_PATH, "pretrained_models/s1v3.ckpt")
 SOVITS_MODEL_PATH = os.path.join(GPT_SOVITS_BASE_PATH, "pretrained_models/s2Gv3.pth")
-REF_AUDIO_PATH = os.path.join(GPT_SOVITS_BASE_PATH, "voice/Lume2.wav") #path to reference audio
+REF_AUDIO_PATH = "" #path to reference audio
 REF_TEXT_CONTENT = "I truly appreciate the efforts put by animators in making this masterpiece." #what your reference audio says
 REF_LANG = "英文" #En= "英文", Cn= "中文", Chinese-English mixed= "中英混合", Japanese-English mixed="日英混合" , Multilingual mixed= "多语种混合"
 TARGET_LANG = "英文" #En= "英文", Cn= "中文", Chinese-English mixed= "中英混合", Japanese-English mixed="日英混合" , Multilingual mixed= "多语种混合"
