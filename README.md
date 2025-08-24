@@ -8,23 +8,23 @@ This software uses libraries from the FFmpeg project under the LGPLv2.1
 
 ## Core (Main features)
 Notes: This is all working around discord.
-### 1) STT with faster whisper
-### 2) T2T with ollama
-### 3) TTS with GPT-SoVITS for easy voice customization 
+1) STT with faster whisper
+2) T2T with ollama
+3) TTS with GPT-SoVITS for easy voice customization 
 
 ## Side (addon feature to core)
-### 1) Vtube studio auto toggle and lipsync
-### 2) Vaedotube lipsync (pngtuber)
-### 3) Emotion detection. AI will respond accordingly to how the user feel.
-### 4) long and short term memory
-### 5) ignored expressions for simple fliter
-### 6) base plugins to make the ai be able to interact with you while you play games
-### 7) user detection with discord id
+1) Vtube studio auto toggle and lipsync
+2) Vaedotube lipsync (pngtuber)
+3) Emotion detection. AI will respond accordingly to how the user feel.
+4) long and short term memory
+5) ignored expressions for simple fliter
+6) base plugins to make the ai be able to interact with you while you play games
+7) user detection with discord id
 ## Experimental ( working in progress/ early testing)
-### 1) Vision
-### 2) an api (currently have POST /chat and GET /status only)
-### 3) Multi mode to have more then 2 ppl in the same call. 
-### 4) Yt and twitch chat reading
+1) Vision
+2) an api (currently have POST /chat and GET /status only)
+3) Multi mode to have more then 2 ppl in the same call. 
+4) Yt and twitch chat reading
 
 
 # System Requirements
