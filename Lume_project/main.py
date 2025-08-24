@@ -7,7 +7,7 @@ import summarizer
 from vts_interface import close_vts_connection
 from tts_interface import initialize_tts_models
 from transcription import initialize_transcription_model
-from discord_bot import client, active_voice_clients, api_process, twitch_bot
+from discord_bot import client, active_voice_clients, api_process, twitch_bot, youtube_bot
 
 async def full_cleanup():
     """A function to gracefully shut down all active connections."""
@@ -22,10 +22,16 @@ async def full_cleanup():
         except subprocess.TimeoutExpired:
             print("API server did not terminate in time, killing.")
             api_process.kill()
+            
     if twitch_bot and twitch_bot.is_running:
         print("Shutting down Twitch bot...")
         await twitch_bot.stop()
         print("Twitch bot disconnected.")
+
+    if youtube_bot and youtube_bot.is_running:
+        print("Shutting down YouTube bot...")
+        await youtube_bot.stop()
+        print("YouTube bot disconnected.")
 
 
     cleanup_tasks = []
