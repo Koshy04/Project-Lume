@@ -43,3 +43,4 @@ flask[async] #api
 waitress#api
 twitchapi #twitch
 #jieba_fast
+pytchat #yt
