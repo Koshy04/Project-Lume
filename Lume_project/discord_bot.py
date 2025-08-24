@@ -1,3 +1,4 @@
+
 import discord
 import asyncio
 import datetime
@@ -29,7 +30,8 @@ from summarizer import summarizer
 from memory import memory_manager
 from plugin_manager import PluginManager
 from plugins.base_plugin import BotInterface
-from twitch import TwitchBot, check_external_chats
+from twitch import TwitchBot
+from yt import YouTubeBot
 
 # --- Global Bot State ---
 intents = discord.Intents.default()
@@ -42,7 +44,9 @@ vts_enabled = False
 veadotube_enabled = False
 vision_mode_enabled = False
 twitch_enabled = False
+youtube_enabled = False
 twitch_bot: TwitchBot | None = None
+youtube_bot: YouTubeBot | None = None
 vision_system: VisionInput | None = None
 active_voice_clients = {}
 response_queue = deque()
@@ -332,10 +336,29 @@ async def generate_and_play_tts(text: str, sink: BufferSink):
     else:
         print("⚠️ WARNING: TTS producer finished but generated no audio segments.")
 
+async def check_external_chats():
+    """Periodically checks Twitch/YouTube for messages and injects them into the queue."""
+    # Twitch Check
+    if twitch_enabled and twitch_bot and twitch_bot.is_running:
+        current_time = time.time()
+        if current_time - twitch_bot.last_prompt_time >= config.CHAT_COOLDOWN_SECONDS:
+            prompt = twitch_bot.get_random_chat_prompt()
+            if prompt:
+                print(f"Injecting prompt from Twitch: '{prompt}'")
+                response_queue.append(("twitch_user", prompt, analyze_emotions(prompt), "twitch_chat_history"))
+                twitch_bot.last_prompt_time = time.time()
+
+    # YouTube Check
+    if youtube_enabled and youtube_bot and youtube_bot.is_running:
+        prompt = youtube_bot.get_random_chat_prompt()
+        if prompt:
+            print(f"Injecting prompt from YouTube: '{prompt}'")
+            response_queue.append(("youtube_user", prompt, analyze_emotions(prompt), "youtube_chat_history"))
+
 # --- Discord Event Handlers ---
 @client.event
 async def on_ready():
-    global vision_system, plugin_manager, external_chat_scheduler, twitch_bot
+    global vision_system, plugin_manager, external_chat_scheduler
     logging.basicConfig(level=logging.INFO)
     print(f"Logged in as {client.user}")
 
@@ -347,27 +370,26 @@ async def on_ready():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if config.VISION_ACTION_WORDS: vision_system = VisionInput(device=device)
     
-    # --- Initialize Twitch Integration ---
-    if config.TWITCH_TOKEN:
+    # --- Initialize External Chat Scheduler ---
+    if config.TWITCH_TOKEN or config.YOUTUBE_VIDEO_ID:
         external_chat_scheduler = AsyncIOScheduler()
-        twitch_bot = TwitchBot(response_queue)
         external_chat_scheduler.add_job(
-            lambda: check_external_chats(twitch_bot, response_queue), 
+            check_external_chats, 
             'interval', 
-            seconds=10, 
+            seconds=15, 
             id='external_chat_checker'
         )
         external_chat_scheduler.start()
-        print("Scheduler for Twitch chats started.")
+        print("Scheduler for external chats (Twitch/YouTube) started.")
     else:
-        print("Skipping Twitch scheduler: No credentials provided in config.")
+        print("Skipping external chat scheduler: No credentials provided in config.")
 
     print("online and ready.")
 
 
 @client.event
 async def on_message(message: discord.Message):
-    global active_mode, vts_enabled, veadotube_enabled, vision_mode_enabled, api_process, twitch_enabled, twitch_bot
+    global active_mode, vts_enabled, veadotube_enabled, vision_mode_enabled, api_process, twitch_enabled, twitch_bot, youtube_enabled, youtube_bot
     if message.author == client.user or not message.content.startswith('!'): return
 
     command, *args = message.content.lower().split(' ')
@@ -383,6 +405,7 @@ async def on_message(message: discord.Message):
         embed.add_field(name="!ss", value=f"Toggle screen vision. (Currently: **{'ON' if vision_mode_enabled else 'OFF'}**)", inline=False)
         embed.add_field(name="!vts / !png", value="Toggle VTube Studio or Veadotube lipsync integrations.", inline=False)
         embed.add_field(name="!twitch", value=f"Toggle Twitch chat integration. (Currently: **{'ON' if twitch_enabled else 'OFF'}**)", inline=False)
+        embed.add_field(name="!yt", value=f"Toggle YouTube chat integration. (Currently: **{'ON' if youtube_enabled else 'OFF'}**)", inline=False)
         embed.add_field(name=f"!api <start|stop|status>", value="Manage the external API server for game engines.", inline=False)
         await message.channel.send(embed=embed)
         return
@@ -484,8 +507,8 @@ async def on_message(message: discord.Message):
     elif command == "!ss": vision_mode_enabled = not vision_mode_enabled; status = "ON" if vision_mode_enabled else "OFF"; await message.channel.send(f"{config.BOT_NAME}'s screen vision ability is now **{status}**.")
 
     elif command == "!twitch":
-        if not config.TWITCH_TOKEN: # This should be changed to check for Nick/Channel now
-            await message.channel.send("Twitch integration is not configured. Please set `TWITCH_NICK` and `TWITCH_CHANNEL` in the config.")
+        if not all([config.TWITCH_APP_ID, config.TWITCH_APP_SECRET, config.TWITCH_CHANNEL]):
+            await message.channel.send("Twitch integration is not fully configured. Please set `TWITCH_APP_ID`, `TWITCH_APP_SECRET`, and `TWITCH_CHANNEL` in the config.")
             return
 
         twitch_enabled = not twitch_enabled
@@ -502,3 +525,23 @@ async def on_message(message: discord.Message):
             if twitch_bot.is_running:
                 await message.channel.send("Disconnecting from Twitch chat...")
                 await twitch_bot.stop()
+
+    elif command == "!yt":
+        if not config.YOUTUBE_VIDEO_ID:
+            await message.channel.send("YouTube integration is not configured. Please set `YOUTUBE_VIDEO_ID` in the config.")
+            return
+
+        youtube_enabled = not youtube_enabled
+        status = "ENABLED" if youtube_enabled else "DISABLED"
+        await message.channel.send(f"YouTube integration is now **{status}**.")
+
+        if youtube_enabled:
+            if not youtube_bot:
+                youtube_bot = YouTubeBot(response_queue)
+            if not youtube_bot.is_running:
+                await message.channel.send("Connecting to YouTube chat...")
+                asyncio.create_task(youtube_bot.run())
+        elif not youtube_enabled and youtube_bot:
+            if youtube_bot.is_running:
+                await message.channel.send("Disconnecting from YouTube chat...")
+                await youtube_bot.stop()
