@@ -95,5 +95,7 @@ Next, head down to BASED_PERSONALITY and describe how you want your ai to act (o
 
 # Personal Notes
 If you have any problems or want to suggest something, join the discord server. I'll mostly be there.
+
 Discord :  https://discord.gg/HYHe8tCSrZ
+
 Yt : https://www.youtube.com/@Koshy-04
