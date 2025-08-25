@@ -20,7 +20,7 @@ Notes: This is all working around discord.
 5) ignored expressions for simple fliter
 6) base plugins to make the ai be able to interact with you while you play games
 7) user detection with discord id
-## Experimental ( working in progress/ early testing)
+## Experimental (working in progress/ early testing)
 1) Vision
 2) an api (currently have POST /chat and GET /status only)
 3) Multi mode to have more then 2 ppl in the same call. 
@@ -103,3 +103,9 @@ If you have any problems or want to suggest something, join the discord server. 
 Discord :  https://discord.gg/HYHe8tCSrZ
 
 Yt : https://www.youtube.com/@Koshy-04
+
+
+# Resources
+TTS = https://github.com/RVC-Boss/GPT-SoVITS
+STT = https://github.com/SYSTRAN/faster-whisper
+
