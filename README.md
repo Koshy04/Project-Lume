@@ -107,5 +107,6 @@ Yt : https://www.youtube.com/@Koshy-04
 
 # Resources
 TTS = https://github.com/RVC-Boss/GPT-SoVITS
+
 STT = https://github.com/SYSTRAN/faster-whisper
 
