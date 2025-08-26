@@ -5,8 +5,8 @@ load_dotenv()
 # --- API Keys & Tokens ---
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 TWITCH_TOKEN = os.getenv('TWITCH_TOKEN') 
-TWITCH_NICK = "Lume"  #leave this "" if u aint using it
-TWITCH_CHANNEL = "koshy04" #leave this "" if u aint using it
+TWITCH_NICK = ""  #leave this "" if u aint using it
+TWITCH_CHANNEL = "" #leave this "" if u aint using it
 TWITCH_APP_ID = os.getenv('TWITCH_APP_ID') # Set your Twitch app ID
 TWITCH_APP_SECRET = os.getenv('TWITCH_APP_SECRET') # Set your Twitch app secret
 YOUTUBE_VIDEO_ID = "" #empty if not using
@@ -14,7 +14,7 @@ CHAT_COOLDOWN_SECONDS = 15 #for live stream
 
 # --- Ollama Settings ---
 OLLAMA_API_URL = 'http://localhost:11434' #ollama default port
-OLLAMA_MODEL = 'lume2' #your llm model
+OLLAMA_MODEL = 'llama3.2:3b' #your llm model
 
 # --- Core Paths ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) #path to Lume_project. Will be done automatically
