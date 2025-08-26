@@ -4,7 +4,7 @@ This project is an AI Vtuber/Companion that I originally made for my own persona
 
 This software uses libraries from the FFmpeg project under the LGPLv2.1
 
-# *This project does not come with any vtuber models, ai models and ai voice models. You'll have to get those yourself. This project only gives the template to making an ai companion/vtuber.*
+## *This project does not come with any vtuber models, ai models and ai voice models. You'll have to get those yourself. This project only gives the template to making an ai companion/vtuber.*
 # Features
 
 ## Core (Main features)
@@ -32,7 +32,7 @@ Notes: This is all working around discord.
 ### It is recommanded to have a **NVIDIA** GPU with at least 12 gb of vram
 
 # Install from scratch
-notes: It's highly recommanded to use venv
+## *notes: It's highly recommanded to use venv*
 
 ## Installing dependencies
 ### 1) Install python 3.12 :
