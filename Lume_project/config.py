@@ -4,7 +4,6 @@ load_dotenv()
 
 # --- API Keys & Tokens ---
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-TWITCH_TOKEN = os.getenv('TWITCH_TOKEN') 
 TWITCH_NICK = ""  #leave this "" if u aint using it
 TWITCH_CHANNEL = "" #leave this "" if u aint using it
 TWITCH_APP_ID = os.getenv('TWITCH_APP_ID') # Set your Twitch app ID
