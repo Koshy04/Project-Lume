@@ -53,7 +53,10 @@ git clone https://github.com/Koshy04/Project-Lume.git
 ```
 ### 7) head on to Lume project dic
 ```bash
-cd Lume-project
+cd Project-Lume
+```
+```bash
+cd Lume_project
 ```
 ### 8) install dependencies from requirements.txt
 ```bash
