@@ -1,4 +1,4 @@
-discord.py==2.6.0a5260+g4be15b56
+discord.py==2.6.2
 discord-ext-voice-recv==0.5.2a179
 faster-whisper==1.1.1
 APScheduler==3.11.0
@@ -37,8 +37,8 @@ easyocr==1.7.2
 pytesseract==0.3.13
 pyautogui==0.9.54
 mss==10.0.0
-sentence-transformers>=2.2.0#memory
-chromadb#memory
+sentence-transformers>=2.2.0 #memory
+chromadb #memory
 flask[async] #api
 waitress#api
 twitchapi #twitch
