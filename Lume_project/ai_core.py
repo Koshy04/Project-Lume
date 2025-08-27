@@ -1,4 +1,3 @@
-
 import requests
 import json
 import datetime
@@ -108,9 +107,12 @@ async def llm_inference(prompt: str, system_prompt: str, temperature: float = 0.
                 "prompt": prompt,
                 "options": {
                     "temperature": temperature,
-                    "top_p": 0.9, "top_k": 40,
+                    "top_p": 0.9, 
+                    "top_k": 40,
                     "repeat_penalty": 1.15,
-                    "num_predict": 90,
+                    "num_predict": 90, #max token to generate
+                    "num_ctx": 16384, #max memory (context size)
+                    "repeat_last_n": 32,     
                     "stop": stop_sequences or ["\nUser:", "\nHuman:", "\nSystem:"]
                 },
                 "stream": False
@@ -169,4 +171,3 @@ async def chat_with_ai(prompt: str, user_id: str, emotion_data: dict, conversati
         memory_manager.add_raw_turn(user_name, prompt, generated_text, str(user_id))
 
     return generated_text or "I don't know what to say right now."
-    
