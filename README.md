@@ -37,23 +37,25 @@ Notes: This is all working around discord.
 ## Installing dependencies
 ### 1) Install python 3.12 :
 https://www.python.org/downloads/release/python-3120/
-### 2) Install ffmpeg and add it into ur windows path :
+### 2) Install visual studio build tools : 
+https://visualstudio.microsoft.com/downloads/
+### 3) Install ffmpeg and add it into ur windows path :
 https://ffmpeg.org/index.html?pubDate=20250822
-### 3) Install cuda 12.8 :
+### 4) Install cuda 12.8 :
 https://developer.nvidia.com/cuda-12-8-0-download-archive?target_os=Windows&target_arch=x86_64
-### 4) Install pytorch with cuda 12.8 in the terminal
+### 5) Install pytorch with cuda 12.8 in the terminal
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ```
-### 5) Clone the repo
+### 6) Clone the repo
 ```bash
 git clone https://github.com/Koshy04/Project-Lume.git
 ```
-### 6) head on to Lume project dic
+### 7) head on to Lume project dic
 ```bash
 cd Lume-project
 ```
-### 7) install dependencies from requirements.txt
+### 8) install dependencies from requirements.txt
 ```bash
 pip install -r requirements.txt
 ```
@@ -62,11 +64,11 @@ you need to then
 pip install jieba_fast
 ```
 idk why u cant do it automatically in requirements.txt but this is to avoid errors
-### 8) Head to https://huggingface.co/koshy04/Project_Lume/tree/main
+### 9) Head to https://huggingface.co/koshy04/Project_Lume/tree/main
 Download : Every content in pretrained_models and place it in pretrained_models in GPT-SoVITS
-### 9) Download virtual cable:
+### 10) Download virtual cable:
 https://vb-audio.com/Cable/
-### 10) create a .env file 
+### 11) create a .env file 
 copy the .env.example file and paste it in .env. Next add your discord bot token.
 
 # Customizing
