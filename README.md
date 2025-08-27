@@ -29,7 +29,7 @@ Notes: This is all working around discord.
 
 
 # System Requirements
-### It is recommanded to have a **NVIDIA** GPU with at least 12 gb of vram
+### It is recommanded to have a **NVIDIA** GPU with at least 10 gb of vram
 
 # Install from scratch
 ## *notes: It's highly recommanded to use venv*
