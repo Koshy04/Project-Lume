@@ -1,4 +1,3 @@
-
 import discord
 import asyncio
 import datetime
@@ -216,11 +215,45 @@ async def is_speech_for_ai(transcription: str, user_id: str) -> bool:
     return is_for_bot
 
 def is_vision_request(transcription: str) -> bool:
-    if not vision_mode_enabled: return False
-    text = transcription.lower()
+
+    if not vision_mode_enabled: 
+        return False
+    
+    text = transcription.lower().strip()
+    # 1st method (trigger phases)
+    for phrase in config.VISION_TRIGGER_PHRASES:
+        if phrase in text:
+            print(f"Vision request detected via trigger phrase: '{phrase}'")
+            return True
+        
+    # 2nd method (context clues)
+    for clue in config.VISION_CONTEXT_CLUES:
+        if clue in text:
+            print(f"Vision request detected via context clue: '{clue}'")
+            return True
+
+    # 3rd method (fuzzy matching)
     action_match = process.extractOne(text, config.VISION_ACTION_WORDS, scorer=fuzz.partial_token_sort_ratio)
     target_present = any(word in text for word in config.VISION_TARGET_WORDS)
-    return bool(action_match and action_match[1] > config.VISION_CONFIDENCE_THRESHOLD and target_present)
+
+    if action_match and action_match[1] > config.VISION_CONFIDENCE_THRESHOLD:
+        if target_present:
+            print(f"Vision request detected via fuzzy matching: Action '{action_match[0]}' with confidence {action_match[1]}")
+            return True
+        
+    # 4th method (question detection)
+        question_starter = ["what", "whats", "what's", "how", "where", "who", "can you"]
+        if any(text.startswith(starter) for starter in question_starter):
+             print("Vision request detected via question format: '{action_match[0]}'")
+             return True
+        
+    #5th method (imperative commands)
+    imperative_commands = ["see", "look", "show", "describe", "read", "check", "analyze"]
+    if any(text.startswith(cmd) for cmd in imperative_commands):
+        print(f"Vision request detected via imperative command: '{text}'")
+        return True
+
+    return False
 
 async def vc_reply(user_id: str):
     vc_data = next((vc for vc in active_voice_clients.values() if vc['sink'].buf.get(user_id)), None)
@@ -265,7 +298,7 @@ async def handle_vision_request(user_id: str, sink: BufferSink):
             asyncio.to_thread(vision_system.generate_caption, screenshot),
             asyncio.to_thread(vision_system.get_detected_text, screenshot)
         )
-        prompt = f"User asked me to look at the screen. My analysis is:\nScene: '{caption}'\nText: '{ocr_text}'\n\nFormulate a response."
+        prompt = f"You looked at the user's screen. My analysis is:\nScene: '{caption}'\nText: '{ocr_text}'\n\nFormulate a response based on this information. Remember you are talking to {config.USER_NAMES.get(user_id, 'User')}"
         channel_id = str(sink.text_channel.id)
         conversation_log = "\n".join(conversation_history_for_prompt[channel_id])
         ai_response = await chat_with_ai(prompt, user_id, {"dominant_emotion": "neutral"}, conversation_log)
