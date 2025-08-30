@@ -77,14 +77,40 @@ IGNORE_EXPRESSIONS = [
 ]
 
 # --- Vision Feature Settings ---
-VISION_ACTION_WORDS = ["see", "look", "watch", "describe", "tell me about", "what is", "what's"]
-VISION_TARGET_WORDS = ["screen", "this", "that", "it", "image", "picture"]
-VISION_CONFIDENCE_THRESHOLD = 85
-
+VISION_ACTION_WORDS = [
+    # Direct commands
+    "see", "look", "watch", "describe", "show", "view", "check", "observe",
+    # Question starters
+    "what", "whats", "what's", "how", "where", "who", "can you",
+    # Analysis requests
+    "analyze", "read", "tell me", "explain", "identify", "recognize"
+]
+VISION_TARGET_WORDS = [
+    # Screen references
+    "screen", "monitor", "display", "desktop", "window",
+    # Demonstratives
+    "this", "that", "it", "here", "there",
+    # Media types
+    "image", "picture", "photo", "text", "game", "app", "website", "page",
+    # Content types
+    "video", "movie", "stream", "chat", "message", "notification"
+]
+VISION_CONFIDENCE_THRESHOLD = 70
+VISION_TRIGGER_PHRASES = [
+    "what do you see", "what can you see", "describe the screen", "look at this",
+    "what's on screen", "whats on screen", "what's happening", "whats happening",
+    "read this", "read the screen", "can you see", "do you see",
+    "what's this", "whats this", "tell me about this", "explain this",
+    "what am i looking at", "what is this", "screenshot", "screen capture"
+]
+VISION_CONTEXT_CLUES = [
+    "on my screen", "in the game", "in this app", "on the website",
+    "in the chat", "on the page", "in the window", "on display"
+]
 # --- VTube Studio Settings ---
 VTS_PLUGIN_INFO = {
-    "plugin_name": "Lume",
-    "developer": "Koshy",
+    "plugin_name": "Lume", #example
+    "developer": "Koshy", #example
     "authentication_token_path": VTS_TOKEN_PATH
 }
 EMOTION_TO_VTS_ANIMATION = {
