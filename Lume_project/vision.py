@@ -3,6 +3,7 @@ import torch
 import mss
 import easyocr
 import logging
+import numpy as np
 import traceback
 from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
@@ -85,8 +86,8 @@ class VisionInput:
         if not self.ocr_reader:
             return ""
         try:
-            image_array = memoryview(image.tobytes())
-            results = self.ocr_reader.readtext(image, detail=0, paragraph=True)
+            image_np = np.array(image.convert('RGB'))
+            results = self.ocr_reader.readtext(image_np, detail=0, paragraph=True)
             return ' '.join(results)
         except Exception as e:
             self.logger.error(f"Failed to perform OCR: {e}")
