@@ -1,0 +1,11 @@
+.venv/
+.env
+
+__pycache__/
+*.pyc
+
+Backend/src/tts/engines/MeloTTS/
+
+memory/
+
+.vscode/
