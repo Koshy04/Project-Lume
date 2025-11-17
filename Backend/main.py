@@ -100,7 +100,7 @@ async def async_main():
     else: selected_llm_engine = available_llm_engines[0]
     logger.info(f"Using LLM Engine: '{selected_llm_engine}'")
     
-    # --- NEW: Feature Selection (Vision & VTS) ---
+    # --- Feature Selection (Vision & VTS) ---
     vision_enabled = config.VISION_STARTUP
     vts_enabled = config.VTS_ANIMATION_STARTUP
 
