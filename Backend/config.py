@@ -31,10 +31,7 @@ BOT_NAME = "Lume"
 BOT_ALT_NAMES = ["Lume", "Lumi"]# if no alt name, just leave it empty.
 
 USER_NAMES = {
-    "711902618783449118": "Koshy", #For the ai to recognize who it's speaking to via discord id. If none just leave it empty.
-    "524431112089632781": "Zero",
-    "1054415083406626846": "Jo",
-    "1005804595072749598": "Ryvoid"
+    "123234343434343421": "Koshy" #For the ai to recognize who it's speaking to via discord id. If none just leave it empty.
 }
 VIRTUAL_MIC_NAME = "CABLE Input (VB-Audio Virtual Cable)"
 
