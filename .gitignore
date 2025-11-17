@@ -17,3 +17,5 @@ memory/
 vts_token.txt
 
 weight.json
+
+Frontend/node_modules/
