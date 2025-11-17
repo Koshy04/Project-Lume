@@ -4,6 +4,7 @@ import time
 from collections import deque
 import pytchat
 import config
+from src.log.custom_logger import logger
 
 class YouTubeBot:
     """The class that connects to YouTube Live chat using pytchat """
@@ -20,7 +21,7 @@ class YouTubeBot:
         The synchronous chat fetching loop based on the proven working snippet.
         This is designed to be run in a separate thread.
         """
-        print(f"Pytchat thread starting for video ID: {self.video_id}...")
+        logger.info(f"Pytchat thread starting for video ID: {self.video_id}...")
         try:
             # Create the chat object, disabling interruptable to prevent crashes in threads
             self.chat = pytchat.create(video_id=self.video_id, interruptable=False)
@@ -29,25 +30,25 @@ class YouTubeBot:
                 for c in self.chat.get().sync_items():
                     # Format the message exactly as your example shows
                     formatted_message = f"{c.author.name} just said '{c.message}' in chat."
-                    print(f"YouTube chat received: {formatted_message}")
+                    logger.info(f"YouTube chat received: {formatted_message}")
                     self.chat_messages.append(formatted_message)
 
                 time.sleep(2)
 
         except Exception as e:
-            print(f"ERROR in Pytchat thread: {e}")
+            logger.error(f"ERROR in Pytchat thread: {e}")
         finally:
             if self.chat:
                 self.chat.terminate()
-            print("Pytchat thread finished.")
+            logger.info("Pytchat thread finished.")
 
     async def run(self):
         """Starts the chat listener in a separate thread to avoid blocking asyncio."""
         if not self.video_id:
-            print("YouTube bot cannot start: YOUTUBE_VIDEO_ID not set in config.")
+            logger.warning("YouTube bot cannot start: YOUTUBE_VIDEO_ID not set in config.")
             return
         if self.is_running:
-            print("YouTube bot is already running.")
+            logger.info("YouTube bot is already running.")
             return
 
         self._stop_event.clear()
@@ -60,12 +61,12 @@ class YouTubeBot:
     async def stop(self):
         """Stops the chat listener thread."""
         if self.is_running and not self._stop_event.is_set():
-            print("Stopping YouTube bot...")
+            logger.info("Stopping YouTube bot...")
             self._stop_event.set()
             # Give the thread a moment to see the event and break its loop
             await asyncio.sleep(0.5)
         self.is_running = False
-        print("YouTube bot stop signal sent.")
+        logger.info("YouTube bot stop signal sent.")
 
     def get_random_chat_prompt(self) -> str | None:
         """Picks one random message from the recent chat history and removes it."""

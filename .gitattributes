@@ -2,3 +2,4 @@
 /Backend/src/tts/engines/GPT-SoVITS/pretrained_models/models--nvidia--bigvgan_v2_24khz_100band_256x/bigvgan_generator.pt filter=lfs diff=lfs merge=lfs -text
 /Backend/src/tts/engines/GPT-SoVITS/pretrained_models/s1v3.ckpt filter=lfs diff=lfs merge=lfs -text
 /Backend/src/tts/engines/GPT-SoVITS/pretrained_models/s2Gv3.pth filter=lfs diff=lfs merge=lfs -text
+/Frontend/node_modules/electron/dist/electron.exe filter=lfs diff=lfs merge=lfs -text

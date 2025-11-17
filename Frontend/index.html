@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Project Lume</title>
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Content Security Policy to allow local scripts -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+</head>
+<body>
+    <a href="#" class="toggle-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </a>
+
+    <div id="sidebar">
+        <ul>
+            <li><a href="#" id="home-link" class="active">Home</a></li>
+            <li><a href="#" id="vision-link">Vision</a></li>
+        </ul>
+    </div>
+
+    <div id="main">
+        <!-- Home Page Content -->
+        <div id="home-page" class="page-content">
+            <div class="container">
+                <header>
+                    <h1>Project Lume Interface</h1>
+                </header>
+
+                <main>
+                    <!-- Engine Selection Section -->
+                    <div class="card">
+                        <h2>Engine Selection</h2>
+                        <p>Choose the Text-to-Speech (TTS) and Language Model (LLM) engines to use.</p>
+                        <div class="engine-selectors">
+                            <div class="selector-group">
+                                <label for="tts-engine-select">TTS Engine:</label>
+                                <select id="tts-engine-select">
+                                    <option value="" disabled selected>Discovering engines...</option>
+                                </select>
+                            </div>
+                            <div class="selector-group">
+                                <label for="llm-engine-select">LLM Engine:</label>
+                                <select id="llm-engine-select">
+                                    <option value="" disabled selected>Discovering engines...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Controls Section -->
+                    <div class="controls-grid">
+                        <div class="card">
+                            <h2>Local Mode</h2>
+                            <p>Runs the bot using your local microphone and speakers.</p>
+                            <div class="button-group">
+                                <button id="local-ptt-btn">Run Local (PTT)</button>
+                                <button id="local-vad-btn">Run Local (VAD)</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h2>Discord Mode</h2>
+                            <p>Runs the bot as a Discord client.</p>
+                            <div class="button-group">
+                                <button id="discord-btn">Run Discord Bot</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Log Section -->
+                    <div class="card">
+                         <div class="output-header">
+                            <h2>Output Log</h2>
+                            <button id="stop-btn">Stop Running Process</button>
+                        </div>
+                        <pre id="output"></pre>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Vision Page Content -->
+        <div id="vision-page" class="page-content" style="display: none;">
+            <div class="container">
+                <header>
+                    <h1>Vision Settings</h1>
+                </header>
+                <main>
+                    <div class="card">
+                        <h2>Real-time Control</h2>
+                        <p>Toggle the vision system on or off. This can be done before or during a process.</p>
+                        <div class="setting-item">
+                            <label for="vision-toggle">Enable Vision System</label>
+                            <div class="switch-container">
+                                <label class="switch">
+                                    <input type="checkbox" id="vision-toggle">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label for="vision-memory-toggle">Keep Model in Memory when Disabled</label>
+                            <div class="switch-container">
+                                <label class="switch">
+                                    <input type="checkbox" id="vision-memory-toggle" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <p class="setting-note">Disabling "Keep Model in Memory" will free up VRAM when the vision system is turned off, but it will take longer to re-enable.</p>
+                    </div>
+                    <div class="card">
+                        <!-- START: MODIFIED SECTION -->
+                        <h2>Vision Feed & Region</h2>
+                        <p>A downscaled, real-time view of what the AI is seeing. Click "Set Region" to draw a specific capture area on the feed.</p>
+                        <div id="vision-feed-container" class="vision-feed-container">
+                            <img id="vision-feed-img" alt="Vision feed will appear here when active.">
+                            
+                            <!-- Elements for drawing the selection -->
+                            <div id="region-overlay"></div>
+                            <div id="selection-box"></div>
+                        </div>
+
+                        <!-- Controls for the region feature -->
+                        <div class="region-controls">
+                            <button id="set-region-btn">Set Region</button>
+                            <button id="clear-region-btn" disabled>Clear Region</button>
+                            <p id="region-status" class="setting-note" style="margin-top: 10px; display: inline-block; margin-left: 15px;"></p>
+                        </div>
+                        <!-- END: MODIFIED SECTION -->
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to your renderer script -->
+    <script src="./renderer.js"></script>
+</body>
+</html>

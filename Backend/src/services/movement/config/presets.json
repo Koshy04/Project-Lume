@@ -1,0 +1,259 @@
+{
+  "Wiggle": [
+    { "FaceAngleZ": -30, "Length": 3.0, "Easing": "sineInOut" },
+    { "FaceAngleZ": 30, "Length": 2.5, "Easing": "sineInOut" },
+    { "FaceAngleZ": 0, "Length": 3.0, "Easing": "sineInOut" }
+  ],
+  "Blink": [
+    { "EyeOpenLeft": 0, "EyeOpenRight": 0, "Length": 0.10, "Easing": "easeIn" },
+    { "EyeOpenLeft": 1, "EyeOpenRight": 1, "Length": 0.20, "Easing": "easeOut" }
+  ],
+  "Smirk": [
+    {
+      "MouthX": 1.0,
+      "MouthSmile": 0.7,
+      "BothHandsFound": 1.0,
+      "BrowLeftY": 0.7,
+      "Length": 0.3,
+      "Easing": "easeOut"
+    },
+    { "KeepTime": 1.5 }
+  ],
+  "LookLeft": [
+    { "EyeRightX": -1.0, "FaceAngleX": -20, "Length": 0.5, "Easing": "sineInOut" },
+    { "KeepTime": 3.0 },
+    { "EyeRightX": 0.0, "FaceAngleX": 0.0, "Length": 0.5, "Easing": "sineInOut" }
+  ],
+  "LookRight": [
+    { "EyeRightX": 1.0, "FaceAngleX": 20, "Length": 0.5, "Easing": "sineInOut" },
+    { "KeepTime": 3.0 },
+    { "EyeRightX": 0.0, "FaceAngleX": 0.0, "Length": 0.5, "Easing": "sineInOut" }
+  ],
+  "QuickHeadTilt": [
+    { "FaceAngleZ": -20, "Length": 0.5, "Easing": "sineInOut" },
+    { "FaceAngleZ": 20, "Length": 0.5, "Easing": "sineInOut" },
+    { "FaceAngleZ": 0, "Length": 0.5, "Easing": "sineInOut" }
+  ],
+  "SlightlyConcerned": [
+    {
+      "FaceAngleX": -2.5187,
+      "FaceAngleY": -6.5491,
+      "FaceAngleZ": -0.1899,
+      "MouthSmile": 0.2207,
+      "Brows": 0.2803,
+      "BrowLeftY": 0.3839,
+      "BrowRightY": 0.1767,
+      "EyeOpenLeft": 0.4270,
+      "EyeOpenRight": 0.4129,
+      "EyeLeftX": -0.2800,
+      "EyeRightX": -0.2800,
+      "Length": 0.5,
+      "Easing": "sineInOut"
+    },
+    {
+      "KeepTime": 1.0
+    },
+    {
+      "FaceAngleX": 0,
+      "FaceAngleY": 0,
+      "FaceAngleZ": 0,
+      "MouthSmile": 0,
+      "Brows": 0,
+      "BrowLeftY": 0,
+      "BrowRightY": 0,
+      "EyeOpenLeft": 1,
+      "EyeOpenRight": 1,
+      "EyeLeftX": 0,
+      "EyeRightX": 0,
+      "Length": 0.5,
+      "Easing": "sineInOut"
+    }
+  ],
+  "HappyBounce": [
+    {
+      "FaceAngleY": -15,
+      "FaceAngleX": 10,
+      "MouthSmile": 0.9,
+      "Brows": 0.6,
+      "EyeOpenLeft": 0.2,
+      "EyeOpenRight": 0.2,
+      "Length": 0.5,
+      "Easing": "easeOut"
+    },
+    {
+      "FaceAngleY": 15,
+      "FaceAngleX": -5,
+      "MouthSmile": 1.0,
+      "Brows": 0.7,
+      "EyeOpenLeft": 0.0,
+      "EyeOpenRight": 0.0,
+      "Length": 0.4,
+      "Easing": "sineInOut"
+    },
+    {
+      "FaceAngleY": -10,
+      "FaceAngleX": 8,
+      "MouthSmile": 0.95,
+      "Brows": 0.65,
+      "EyeOpenLeft": 0.3,
+      "EyeOpenRight": 0.3,
+      "Length": 0.5,
+      "Easing": "sineInOut"
+    },
+    {
+      "FaceAngleY": 10,
+      "FaceAngleX": -3,
+      "MouthSmile": 1.0,
+      "Brows": 0.7,
+      "EyeOpenLeft": 0.1,
+      "EyeOpenRight": 0.1,
+      "Length": 0.7,
+      "Easing": "sineInOut"
+    },
+    {
+      "FaceAngleY": 0,
+      "FaceAngleX": 0,
+      "MouthSmile": 0.8,
+      "Brows": 0.5,
+      "EyeOpenLeft": 1.0,
+      "EyeOpenRight": 1.0,
+      "Length": 0.6,
+      "Easing": "easeOut"
+    }
+  ],
+  "PuffyCheeks": [
+    {
+      "CheekPuff": 1.0,
+      "Brows": -1.0,
+      "FaceAngleY": -15,
+      "FaceAngleZ": -8,
+      "Length": 1.0,
+      "Easing": "easeOut"
+    },
+    {
+      "KeepTime": 1.5
+    },
+    {
+      "CheekPuff": 0,
+      "Brows": 0,
+      "FaceAngleY": 0,
+      "FaceAngleZ": 0,
+      "Length": 0.5,
+      "Easing": "sineInOut"
+    }
+  ],
+    "Mad": [
+    {
+      "FaceAngleY": 15,
+      "CheekPuff": 1.0,
+      "MouthSmile": -1.0,
+      "BrowLeftY": -1.0,
+      "EyeOpenLeft": 0.6,
+      "EyeOpenRight": 0.6,
+      "Length": 0.5,
+      "Easing": "easeOut"
+    },
+    {
+      "KeepTime": 3.0
+    },
+    {
+      "FaceAngleY": 0,
+      "CheekPuff": 0,
+      "MouthSmile": 0,
+      "Brows": 0,
+      "EyeOpenLeft": 1.0,
+      "EyeOpenRight": 1.0,
+      "Length": 0.6,
+      "Easing": "easeInOut"
+    }
+  ],
+  "Sad": [
+    {
+      "FaceAngleY": -10,
+      "MouthSmile": -0.8,
+      "Brows": 0.8,
+      "EyeOpenLeft": 0.8,
+      "EyeOpenRight": 0.8,
+      "Length": 0.7,
+      "Easing": "sineInOut"
+    },
+    {
+      "KeepTime": 3.0
+    },
+    {
+      "FaceAngleY": 0,
+      "MouthSmile": 0,
+      "Brows": 0,
+      "EyeOpenLeft": 1.0,
+      "EyeOpenRight": 1.0,
+      "Length": 0.6,
+      "Easing": "easeInOut"
+    }
+  ],
+    "DisappointedCry": [
+    {
+      "FaceAngleY": -20,
+      "MouthSmile": -1.0,
+      "Brows": 1.0,
+      "EyeOpenLeft": 0.2,
+      "EyeOpenRight": 0.2,
+      "Length": 0.6,
+      "Easing": "easeOut"
+    },
+    {
+      "FaceAngleY": -18,
+      "FaceAngleZ": 5,
+      "MouthSmile": -0.9,
+      "EyeOpenLeft": 0.3,
+      "EyeOpenRight": 0.3,
+      "Length": 0.8,
+      "Easing": "sineInOut"
+    },
+    {
+      "FaceAngleY": -22,
+      "FaceAngleZ": -5,
+      "MouthSmile": -1.0,
+      "EyeOpenLeft": 0.25,
+      "EyeOpenRight": 0.25,
+      "Length": 0.7,
+      "Easing": "sineInOut"
+    },
+    {
+      "KeepTime": 3.0
+    },
+    {
+      "FaceAngleY": 0,
+      "MouthSmile": 0,
+      "Brows": 0,
+      "FaceAngleZ": 0,
+      "EyeOpenLeft": 1.0,
+      "EyeOpenRight": 1.0,
+      "Length": 0.8,
+      "Easing": "easeInOut"
+    }
+  ],
+    "Cry": [
+    {
+      "FaceAngleY": -10,
+      "MouthSmile": -0.8,
+      "Brows": 0.8,
+      "EyeOpenLeft": 0.8,
+      "EyeOpenRight": 0.8,
+      "Length": 0.7,
+      "Easing": "sineInOut"
+    },
+    {
+      "KeepTime": 3.0
+    },
+    {
+      "FaceAngleY": 0,
+      "MouthSmile": 0,
+      "Brows": 0,
+      "EyeOpenLeft": 1.0,
+      "EyeOpenRight": 1.0,
+      "Length": 0.6,
+      "Easing": "easeInOut"
+    }
+  ]
+
+}

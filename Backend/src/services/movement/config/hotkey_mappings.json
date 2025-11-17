@@ -1,0 +1,14 @@
+{
+  "Mad": {
+    "on_start": ["dfa674d711d9431dac3aaa130bd5956b"],
+    "on_end": ["dfa674d711d9431dac3aaa130bd5956b"]
+  },
+  "Cry": {
+    "on_start": ["db6c05441f804013a4dae641c13ca931"],
+    "on_end": ["db6c05441f804013a4dae641c13ca931"]
+  },
+  "DisappointedCry": {
+    "on_start": ["db6c05441f804013a4dae641c13ca931", "dfa674d711d9431dac3aaa130bd5956b"],
+    "on_end": ["db6c05441f804013a4dae641c13ca931", "dfa674d711d9431dac3aaa130bd5956b"]
+  }
+}

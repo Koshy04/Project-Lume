@@ -3,13 +3,16 @@ from flask import Flask, request, jsonify
 from waitress import serve
 import sys
 import os
+import traceback
+from src.log.custom_logger import logger
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 try:
     from src.core.ai_core import chat_with_ai, analyze_emotions, add_to_recent_responses, is_too_similar_to_recent
     from config import USER_NAMES
     IMPORTS_SUCCESSFUL = True
 except ImportError as e:
-    print(f"API ERROR: Could not import Lume modules: {e}. The API will run but return error messages.")
+    logger.critical(f"API ERROR: Could not import Lume modules: {e}. The API will run but return error messages.")
     IMPORTS_SUCCESSFUL = False
 
 # --- Initialize Flask App ---
@@ -66,14 +69,14 @@ async def handle_chat():
         return jsonify(response_payload), 200
 
     except Exception as e:
-        print(f"ERROR in /chat endpoint: {e}\n{__import__('traceback').format_exc()}")
+        logger.error(f"ERROR in /chat endpoint: {e}\n{traceback.format_exc()}")
         return jsonify({"error": "An internal error occurred while processing the AI response."}), 500
 
 def main():
     """Main entry point for running the API server."""
-    print("--- API Server ---")
-    print("Starting Waitress server on http://0.0.0.0:8080")
-    print("The API is now available for game plugins.")
+    logger.info("--- API Server ---")
+    logger.info("Starting Waitress server on http://0.0.0.0:8080")
+    logger.info("The API is now available for game plugins.")
     serve(app, host='0.0.0.0', port=8080)
 
 if __name__ == '__main__':

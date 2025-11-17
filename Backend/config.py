@@ -7,10 +7,6 @@ DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 YOUTUBE_VIDEO_ID = ""
 CHAT_COOLDOWN_SECONDS = 15 #for live stream
 
-# --- Ollama Settings ---
-OLLAMA_API_URL = 'http://localhost:11434' #ollama default port
-OLLAMA_MODEL = 'LumeV2' #your llm model
-
 # --- Core Paths ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 
@@ -66,37 +62,49 @@ IGNORE_EXPRESSIONS = [
 ]
 
 # --- Vision Feature Settings ---
-VISION_STARTUP = False #if you want vision to be on during startup
-VISION_ACTION_WORDS = [
-    # Direct commands
-    "see", "look", "watch", "describe", "show", "view", "check", "observe",
-    # Question starters
-    "what", "whats", "what's", "how", "where", "who", "can you",
-    # Analysis requests
-    "analyze", "read", "tell me", "explain", "identify", "recognize"
-]
-VISION_TARGET_WORDS = [
-    # Screen references
-    "screen", "monitor", "display", "desktop", "window",
-    # Demonstratives
-    "this", "that", "it", "here", "there",
-    # Media types
-    "image", "picture", "photo", "text", "game", "app", "website", "page",
-    # Content types
-    "video", "movie", "stream", "chat", "message", "notification"
-]
-VISION_CONFIDENCE_THRESHOLD = 70
-VISION_TRIGGER_PHRASES = [
-    "what do you see", "what can you see", "describe the screen", "look at this",
-    "what's on screen", "whats on screen", "what's happening", "whats happening",
-    "read this", "read the screen", "can you see", "do you see",
-    "what's this", "whats this", "tell me about this", "explain this",
-    "what am i looking at", "what is this", "screenshot", "screen capture"
-]
-VISION_CONTEXT_CLUES = [
-    "on my screen", "in the game", "in this app", "on the website",
-    "in the chat", "on the page", "in the window", "on display"
-]
+VISION_STARTUP = False # If you want vision to be on during startup.
+VISION_UPDATE_INTERVAL_SECONDS = 20 # How often to take a screenshot and update context.
+
+# --- Vision Engine Settings ---
+# Device settings: "cpu" or "cuda"
+BLIP2_DEVICE = "cuda"
+OCR_GPU_ACCELERATION = False # False = CPU, True = GPU
+BLIP_MODEL_ID = "Salesforce/blip2-opt-2.7b"
+
+# Language settings for OCR
+VISION_LANGUAGES = ['en']
+
+# --- Default Processing Settings ---
+# Screenshot
+DEFAULT_MONITOR = 1
+
+# OCR
+OCR_APPLY_PREPROCESSING = True
+OCR_CONFIDENCE_THRESHOLD = 0.4
+OCR_SCALE_FACTOR = 1.5
+OCR_DETAIL_LEVEL = 1  # 0 for text only, 1 for text+bbox+confidence
+OCR_PARAGRAPH_MODE = False
+
+# 'greedy' = faster, less accurate, less resource intensive; 
+# 'beamsearch' = balanced; 
+# 'wordbeamsearch' = slower, more accurate , more resource intensive
+OCR_DECODER = 'wordbeamsearch'  # 'beamsearch' or 'greedy' or 'wordbeamsearch'
+OCR_BATCH_SIZE = 6
+
+# Image Preprocessing (used if OCR_APPLY_PREPROCESSING is True)
+OCR_DEFAULT_PREPROCESSING_OPTIONS = {
+    'enhance_contrast': 1.5,
+    'enhance_sharpness': 2.0,
+    'enhance_brightness': 1.0,
+    'denoise': True,
+    'binarize': True, # Convert to binary (black and white) image
+    'binarize_threshold': 128 # 0 (completely black) , 255 (completely white)
+}
+
+# Image Captioning
+CAPTION_MAX_LENGTH = 200
+CAPTION_NUM_BEAMS = 5
+CAPTION_TEMPERATURE = 1.0
 
 # --- VTube Studio Settings ---
 VTS_PLUGIN_INFO = {
@@ -104,13 +112,13 @@ VTS_PLUGIN_INFO = {
     "developer": "Koshy",
     "authentication_token_path": VTS_TOKEN_PATH
 }
-EMOTION_TO_VTS_ANIMATION = {
-    # "joy": "JoyfulAnimationHotkey",
-    # "anger": "AngryAnimationHotkey"
-}
+VTS_ANIMATION_STARTUP = True
+RHUBARB_EXECUTABLE_PATH = "D:\\AI\\Rhubarb-Lip-Sync-1.14.0-Windows\\rhubarb.exe" # Path to Rhubarb Lip Sync executable
 
 # --- Personality Prompts ---
-BASED_PERSONALITY = """You must follow these rules:
+BASED_PERSONALITY = """
+Your name is Lumi.
+You must follow these rules:
 1. Never use hyphens in your response. For example, write \"in game\" instead of \"in-game\".
 2. Do not include internal monologues, roleplay actions, or stage directions. Only write direct text.
 3. Don't call the user "human" or "user". Use their name if known, otherwise use "you"."""

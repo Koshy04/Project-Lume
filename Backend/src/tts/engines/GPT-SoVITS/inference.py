@@ -3,6 +3,7 @@ import os
 import traceback
 import asyncio
 from . import config as engine_config
+from src.log.custom_logger import logger
 
 class TTSEngine:
     """
@@ -18,11 +19,10 @@ class TTSEngine:
 
     def _load_libraries(self):
         """Dynamically imports the necessary functions from the GPT-SoVITS library."""
-        # The BASE_PATH is now correctly read from the engine's own config
         base_path = engine_config.BASE_PATH
         
         if not os.path.exists(base_path):
-            print(f"!!! [GPT_SoVITS] WARNING: Base path not found at '{base_path}'. This engine will be disabled.")
+            logger.warning(f"[GPT_SoVITS] Base path not found at '{base_path}'. This engine will be disabled.")
             return
 
         if base_path not in sys.path:
@@ -37,8 +37,7 @@ class TTSEngine:
             self.change_sovits_weights = change_sovits_weights
             self.i18n = I18nAuto()
         except ImportError as e:
-            print(f"!!! [GPT_SoVITS] ERROR: Failed to import modules: {e}")
-            traceback.print_exc()
+            logger.error(f"[GPT_SoVITS] Failed to import modules: {e}\n{traceback.format_exc()}")
 
     def initialize(self) -> bool:
         """Initializes the TTS models using paths from its own config. Returns True on success."""
@@ -46,7 +45,7 @@ class TTSEngine:
             return True
         
         if not all([self.get_tts_wav, self.change_gpt_weights, self.change_sovits_weights, self.i18n]):
-            print("!!! FATAL: GPT-SoVITS library functions were not loaded. Cannot initialize.")
+            logger.critical("[GPT_SoVITS] Library functions were not loaded. Cannot initialize.")
             return False
 
         try:
@@ -54,9 +53,10 @@ class TTSEngine:
             self.change_sovits_weights(sovits_path=engine_config.SOVITS_MODEL_PATH)
             
             self.is_initialized = True
+            logger.info("[GPT_SoVITS] Engine initialized successfully.")
             return True
         except Exception as e:
-            print(f"!!! [GPT_SoVITS] FATAL INITIALIZATION ERROR: {e}")
+            logger.critical(f"[GPT_SoVITS] FATAL INITIALIZATION ERROR: {e}")
             return False
 
     def stream_generate(
@@ -70,12 +70,11 @@ class TTSEngine:
         """
         if not self.is_initialized:
             error_msg = "GPT-SoVITS Inference: Models not initialized. Aborting."
-            print(error_msg)
+            logger.error(error_msg)
             asyncio.run_coroutine_threadsafe(queue_to_async.put(Exception(error_msg)), event_loop_for_queue).result()
             return
 
         try:
-            # All these generation parameters also come from the engine's config
             tts_params = {
                 "how_to_cut": self.i18n(engine_config.how_to_cut), "sample_steps": engine_config.sample_steps,
                 "top_k": engine_config.top_k, "top_p": engine_config.top_p, 
@@ -94,8 +93,7 @@ class TTSEngine:
                     asyncio.run_coroutine_threadsafe(queue_to_async.put(item_to_queue), event_loop_for_queue).result()
 
         except Exception as e:
-            print(f"FATAL Error in GPT-SoVITS Producer Thread: {e}")
-            traceback.print_exc()
+            logger.critical(f"FATAL Error in GPT-SoVITS Producer Thread: {e}\n{traceback.format_exc()}")
             asyncio.run_coroutine_threadsafe(queue_to_async.put(e), event_loop_for_queue).result()
         finally:
             asyncio.run_coroutine_threadsafe(queue_to_async.put(None), event_loop_for_queue).result()

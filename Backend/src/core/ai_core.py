@@ -3,14 +3,16 @@ import re
 from nrclex import NRCLex
 from fuzzywuzzy import fuzz, process
 import config
-from src.services.memory.memory import memory_manager
+from src.services.memorys.memory import memory_manager
+from src.log.custom_logger import logger
 
 class AICore:
     """
     Manages all AI-related tasks including language model inference,
-    emotion analysis, and intent classification using a non-blocking HTTP client.
+    emotion analysis, and intent classification.
     """
-    def __init__(self):
+    def __init__(self, llm_manager):
+        self.llm_manager = llm_manager
         self.client = httpx.AsyncClient(timeout=60.0)
 
         wake_words_pattern = '|'.join(re.escape(name.lower()) for name in config.BOT_WAKE_WORDS)
@@ -21,34 +23,36 @@ class AICore:
             "start": re.compile(rf'^({wake_words_pattern})[\s,]'),
             "end": re.compile(rf'[\s,]+({wake_words_pattern})\??\s*$')
         }
-        print("AI Core initialized with Ollama model:", config.OLLAMA_MODEL)
 
-    # --- Public Methods ---
+        logger.info("AI Core initialized.")
 
-    async def chat_with_ai(self, prompt: str, user_id: str, emotion_data: dict, conversation_history: str) -> str:
+    async def chat_with_ai(self, prompt: str, user_id: str, emotion_data: dict, conversation_history: str, vision_context: dict | None = None) -> str:
         """
         Generates a contextual AI response using conversation history and vector memory.
-        This is the primary method for getting a text response from the bot.
         """
         user_name = config.USER_NAMES.get(str(user_id), f"User({user_id})")
         dominant_emotion = emotion_data.get("dominant_emotion", "neutral")
-
-        # Get semantically relevant memories for this user and prompt
         relevant_memory_context = memory_manager.search_memories(prompt, user_id)
-
         system_instruction = (
             f"{getattr(config, 'BASED_PERSONALITY', 'You are a helpful AI assistant.')}\n\n"
             f"--- RECENT CONVERSATION ---:\n{conversation_history}\n\n"
             f"--- RELEVANT MEMORIES ---:\n{relevant_memory_context}\n\n"
             f"--- You are talking to {user_name} ---\n"
         )
+        
+        if vision_context:
+            caption = vision_context.get('caption', 'N/A')
+            ocr_text = vision_context.get('ocr_text', 'N/A')
+            system_instruction += (
+                f"\n--- CURRENT SCREEN CONTEXT (What you can see right now) ---\n"
+                f"- Overall Scene: '{caption}'\n- Text on Screen: '{ocr_text}'\n"
+            )
 
         if dominant_emotion in getattr(config, 'EMOTION_RESPONSES', {}):
             system_instruction += f"\n\nEMOTION CONTEXT: {config.EMOTION_RESPONSES[dominant_emotion]}"
 
         temp = self._get_temperature_for_emotion(dominant_emotion)
-
-        generated_text = await self._llm_inference(
+        generated_text = await self.llm_manager.generate(
             prompt=prompt,
             system_prompt=system_instruction,
             temperature=temp,
@@ -58,13 +62,69 @@ class AICore:
         if "I'm having trouble responding right now." in generated_text: 
             return generated_text
 
-        # Save the raw turn to the vector memory
         if prompt.strip() and generated_text:
             memory_manager.add_raw_turn(user_name, prompt, generated_text, str(user_id))
 
         return generated_text or "I don't know what to say right now."
 
-    # --- Analysis & Classification Methods ---
+    async def determine_animation_sequence(self, text: str, available_animations: list) -> list[str]:
+        """
+        Uses the LLM to choose a sequence of animations based on dialogue length and energy.
+        """
+        if not available_animations:
+            return []
+            
+        anim_list_str = ", ".join(available_animations)
+        
+        system_prompt = (
+            "You are an expert Animation Director for a VTuber. Your task is to create a short sequence of animations "
+            "that matches the bot's dialogue. Your response will be a comma-separated list of animation names."
+        )
+        
+        prompt = (
+            f"RULES:\n"
+            f"1. For short, simple dialogue (under 10 words), respond with ONE animation.\n"
+            f"2. For longer or more expressive dialogue, respond with 2-3 animations.\n"
+            f"3. If the dialogue is very energetic or emotional, you can REPEAT an animation (e.g., HappyBounce, HappyBounce).\n"
+            f"4. Choose ONLY from the provided list. Your response must be a comma-separated list and nothing else.\n"
+            f"5. If no animation fits, respond with 'Idle'.\n\n"
+            f"--- EXAMPLE ---\n"
+            f"Dialogue: \"Oh wow, that is absolutely insane! I love it!\"\n"
+            f"Available Animations: [{anim_list_str}]\n"
+            f"Response: Surprise, HappyBounce, HappyBounce\n\n"
+            f"--- TASK ---\n"
+            f"Dialogue: \"{text}\"\n"
+            f"Available Animations: [{anim_list_str}]\n"
+            f"Response:"
+        )
+        
+        try:
+            llm_response = await self.llm_manager.generate(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                temperature=0.4,
+                stop_sequences=["\n"]
+            )
+            
+            # Sanitize and split the response into a list of potential animation names
+            raw_choices = [choice.strip().strip('.?!,"\'') for choice in llm_response.split(',')]
+            
+            final_sequence = []
+            for choice in raw_choices:
+                if not choice or choice.lower() == 'idle':
+                    continue
+                
+                # Fuzzy match each choice to ensure it's a valid animation
+                match = process.extractOne(choice, available_animations, score_cutoff=85)
+                if match:
+                    final_sequence.append(match[0])
+            
+            logger.info(f"Animation Director raw: '{llm_response}', Final sequence: {final_sequence}")
+            return final_sequence
+
+        except Exception as e:
+            logger.error(f"Error in animation director: {e}")
+            return []
 
     def analyze_emotions(self, text: str) -> dict:
         """Analyzes text for emotions and returns a dominant emotion and scores."""
@@ -83,7 +143,7 @@ class AICore:
             dominant = 'anticipation' if dominant == 'anticip' else dominant
             return {"dominant_emotion": dominant, "emotions": emotions}
         except Exception as e:
-            print(f"Error analyzing emotions for text '{text[:30]}...': {e}")
+            logger.error(f"Error analyzing emotions for text '{text[:30]}...': {e}")
             return {"dominant_emotion": "neutral", "emotions": {}}
 
     async def is_speech_for_ai(self, transcription: str, user_id: str, active_mode: str) -> bool:
@@ -98,7 +158,6 @@ class AICore:
         if cleaned_transcription in config.IGNORE_EXPRESSIONS:
             return False
         
-        # In local mode or single-user mode, always assume it's for the bot.
         if active_mode == "local" or config.DEFAULT_BOT_MODE == config.BOT_MODES["SINGLE"]:
             return True
             
@@ -112,100 +171,22 @@ class AICore:
         if self.wake_word_patterns["end"].search(text): return True
         return False
 
-    def is_vision_request(self, transcription: str) -> bool:
-        """Checks if a transcription is likely a request for the vision system."""
-        text = transcription.lower().strip()
-        
-        if any(phrase in text for phrase in config.VISION_TRIGGER_PHRASES):
-            return True
-            
-        if any(clue in text for clue in config.VISION_CONTEXT_CLUES):
-            return True
-        
-        action_match = process.extractOne(text, config.VISION_ACTION_WORDS, scorer=fuzz.partial_token_sort_ratio)
-        target_present = any(word in text for word in config.VISION_TARGET_WORDS)
-        
-        if action_match and action_match[1] > config.VISION_CONFIDENCE_THRESHOLD and target_present:
-            return True
-        
-        imperative_commands = ["see", "look", "show", "describe", "read", "check", "analyze"]
-        if any(text.startswith(cmd) for cmd in imperative_commands):
-            return True
-            
-        return False
-
-    # --- Internal Helper Methods ---
-
     def _get_temperature_for_emotion(self, dominant_emotion: str) -> float:
         """Returns a fine-tuned temperature setting based on the user's emotion."""
-        emotion_temps = {
-            "joy": 0.9,
-            "sadness": 0.7,
-            "surprise": 1.0,
-            "anger": 0.75
-        }
+        emotion_temps = { "joy": 0.9, "sadness": 0.7, "surprise": 1.0, "anger": 0.75 }
         return emotion_temps.get(dominant_emotion, 0.8)
 
-    async def _llm_inference(self, prompt: str, system_prompt: str, temperature: float, stop_sequences: list) -> str:
-        """Internal async method to call the Ollama API with httpx."""
-        json_payload = {
-            "model": config.OLLAMA_MODEL,
-            "system": system_prompt,
-            "prompt": prompt,
-            "options": {
-                "temperature": temperature, "top_p": 1.5, "top_k": 40,
-                "repeat_penalty": 1.15, "num_predict": 90, "num_ctx": 16384,
-                "repeat_last_n": 32, "stop": stop_sequences
-            },
-            "stream": False
-        }
-        try:
-            response = await self.client.post(f"{config.OLLAMA_API_URL}/api/generate", json=json_payload)
-            response.raise_for_status()
-            result = response.json()
-            return result.get("response", "").strip()
-        except httpx.RequestError as e:
-            print(f"Error connecting to Ollama API: {e}")
-            return "Sorry, I'm having trouble connecting to my brain right now."
-        except Exception as e:
-            print(f"Error in LLM inference: {e}")
-            return "Sorry, something went wrong while I was thinking."
-            
     async def _classify_speech_intent_with_ai(self, transcription: str) -> bool:
-        """Uses a specialized LLM call to determine if speech is for the bot."""
-        bot_name = getattr(config, 'BOT_NAME', 'Assistant')
-        alt_names = getattr(config, 'BOT_ALT_NAMES', [bot_name.lower(), bot_name])
-        alt_names_str = "', '".join(set(alt_names))
-        
-
-        system_prompt = f"""You are a 'Conversation Target' analysis expert. Your job is to analyze the user's text and identify who the user is speaking to.
-The AI bot's name is '{bot_name}' and may also be called '{alt_names_str}'.
-You must respond with ONLY ONE of the following three words:
-- '{bot_name}' if the user is addressing the bot.
-- 'Other' if the user is addressing another person or group.
-- 'General' if the user is making a general statement to no one in particular."""
-        
-        full_prompt = f"System: {system_prompt}\n\nUser: \"{transcription}\"\nSystem:"
-        
-        json_payload = {
-            "model": config.OLLAMA_MODEL,
-            "prompt": full_prompt,
-            "options": {"temperature": 0.0, "top_p": 0.1, "num_predict": 5, "stop": ["\n", "."]},
-            "stream": False
-        }
-        
+        """Uses the active LLM engine to determine if speech is for the bot."""
         try:
-            response = await self.client.post(f"{config.OLLAMA_API_URL}/api/generate", json=json_payload)
-            response.raise_for_status()
-            result = response.json()
-            generated_text = result.get("response", "").strip().lower()
-            print(f"Target Analysis for '{transcription}': AI returned -> '{generated_text}'")
+            generated_text = await self.llm_manager.classify_intent(transcription)
+            generated_text = generated_text.strip().lower()
+
+            logger.info(f"Target Analysis for '{transcription}': AI returned -> '{generated_text}'")
             
-            bot_names_to_check = [bot_name.lower()] + [name.lower() for name in alt_names]
+            bot_names_to_check = ['bot'] + [name.lower() for name in config.BOT_WAKE_WORDS] + [config.BOT_NAME.lower()]
             return any(name in generated_text for name in bot_names_to_check)
-        except httpx.RequestError as e:
-            print(f"Error connecting to Ollama for intent classification: {e}")
-            return False
+
         except Exception as e:
-            print(f"Error during intent classification: {e}")
+            logger.error(f"Error during intent classification via LLMManager: {e}")
             return False

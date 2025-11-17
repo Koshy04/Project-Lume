@@ -44,3 +44,7 @@ waitress #api
 pytchat #yt
 pynput #local audio (push to talk)
 silero-vad==6.0.0 #Local audio (VAD)
+fastapi #webui
+uvicorn[standard] #webui
+python-multipart #webui
+jinja2 #webui

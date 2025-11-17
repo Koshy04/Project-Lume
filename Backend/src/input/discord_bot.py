@@ -6,7 +6,6 @@ import io
 import wave
 import tempfile
 import traceback
-import logging
 import subprocess
 import sys
 from collections import defaultdict
@@ -14,8 +13,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext import voice_recv
 import soundfile as sf
 import config
+from src.log.custom_logger import logger
+
 from src.core.bot import Bot
-from src.core.bot import find_audio_device_id, play_audio_on_device
+from src.core.bot import find_audio_device_id
 
 # --- Discord-specific Global State ---
 intents = discord.Intents.default()
@@ -52,7 +53,6 @@ class BufferSink(voice_recv.AudioSink):
         self.buf[user_id] += data.pcm
         job_id = f'vc_buffer_timer_{user_id}'
         run_time = datetime.datetime.now() + datetime.timedelta(seconds=0.5)
-        # Pass self.bot to the job so it has context
         self.scheduler.add_job(vc_reply, 'date', run_date=run_time, args=[user_id, self.bot], id=job_id, replace_existing=True)
 
     def freshen(self, user_id):
@@ -73,21 +73,20 @@ class BufferSink(voice_recv.AudioSink):
         loop = asyncio.get_event_loop()
         while not self._shutdown:
             try:
-
                 audio_item = await asyncio.wait_for(self.audio_playback_queue.get(), timeout=60.0)
                 if audio_item is None: break
                 samplerate, audio_data = audio_item
 
                 discord_playback_finished = asyncio.Event()
                 def after_discord_play(error):
-                    if error: print(f"Discord playback error: {error}")
+                    if error: logger.error(f"Discord playback error: {error}")
                     loop.call_soon_threadsafe(discord_playback_finished.set)
 
                 lipsync_future = None
                 if (self.bot.vts_enabled or self.bot.veadotube_enabled):
                     device_id = find_audio_device_id(config.VIRTUAL_MIC_NAME)
                     if device_id is not None:
-                        lipsync_future = loop.run_in_executor(None, play_audio_on_device, audio_data, samplerate, device_id)
+                        lipsync_future = loop.run_in_executor(None, audio_data, samplerate, device_id)
                 
                 in_memory_file = io.BytesIO()
                 sf.write(in_memory_file, audio_data, samplerate, format='WAV', subtype='PCM_16')
@@ -102,7 +101,9 @@ class BufferSink(voice_recv.AudioSink):
 
                 self.audio_playback_queue.task_done()
             except (asyncio.TimeoutError, asyncio.CancelledError): break
-            except Exception: traceback.print_exc(); break
+            except Exception: 
+                logger.error(f"Error in Discord dedicated audio player:\n{traceback.format_exc()}")
+                break
         self.playback_task = None
 
 async def vc_reply(user_id: str, bot: Bot):
@@ -123,29 +124,25 @@ async def vc_reply(user_id: str, bot: Bot):
                 wf.setframerate(vc_data['sink'].sample_rate)
                 wf.writeframes(user_audio_data)
         
-        # Accessing transcription via bot object's transcription component
         transcription = await bot.loop.run_in_executor(None, bot.transcription.transcribe, file_path)
         os.remove(file_path)
 
         if transcription:
             user_name = config.USER_NAMES.get(user_id, f"User({user_id})")
-            print(f"Transcription from {user_name}: {transcription}")
+            logger.info(f"Transcription from {user_name}: {transcription}")
             
-            # Accessing AI logic via bot object's AI component
             if await bot.ai.is_speech_for_ai(transcription, user_id, bot.active_mode):
                 channel_id = str(vc_data['sink'].text_channel.id)
                 
-                # Accessing conversation history via bot object
                 bot.conversation_history_for_prompt[channel_id].append(f"{user_name}: {transcription}")
                 bot.conversation_log_for_summary[channel_id].append({"role": user_name, "content": transcription, "user_id": user_id})
                 
                 emotion_data = bot.ai.analyze_emotions(transcription)
                 
-                # Enqueue the task to the central bot queue
                 await bot.response_queue.put((user_id, transcription, emotion_data, channel_id))
 
     except Exception as e: 
-        print(f"Error in vc_reply: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in vc_reply: {e}\n{traceback.format_exc()}")
     finally:
         if vc_data and user_id in vc_data['sink'].is_processing_user_buffer:
             vc_data['sink'].is_processing_user_buffer[user_id] = False
@@ -155,26 +152,23 @@ async def check_external_chats(bot: Bot):
         prompt = bot.youtube_bot.get_random_chat_prompt()
         if prompt:
             emotion_data = bot.ai.analyze_emotions(prompt)
-            # Use put now because this is not an async function
             await bot.response_queue.put(("youtube_user", prompt, emotion_data, "youtube_chat_history"))
 
 @client.event
 async def on_ready():
     global external_chat_scheduler
-    logging.basicConfig(level=logging.INFO)
-    print(f"Logged in as {client.user}")
+    logger.info(f"Logged in as {client.user}")
     
     if config.YOUTUBE_VIDEO_ID:
         external_chat_scheduler = AsyncIOScheduler()
-        # Pass client.bot as an argument to the scheduled job
         external_chat_scheduler.add_job(check_external_chats, 'interval', seconds=15, id='external_chat_checker', args=[client.bot])
         external_chat_scheduler.start()
-    print("Discord bot is online and ready.")
+    
+    logger.info("Discord bot is online and ready.")
 
 @client.event
 async def on_message(message: discord.Message):
     global api_process
-    # All state and logic is now accessed through the injected client.bot object
     bot = client.bot
 
     if message.author == client.user or not message.content.startswith('!'): return
@@ -194,7 +188,6 @@ async def on_message(message: discord.Message):
         user_id = str(message.author.id)
         channel_id = str(message.channel.id)
         
-        # Use the bot's components directly
         emotion_data = bot.ai.analyze_emotions(prompt)
         conversation_log = "\n".join(bot.conversation_history_for_prompt[channel_id])
         
@@ -213,7 +206,6 @@ async def on_message(message: discord.Message):
         embed.add_field(name="!join / !leave", value="Joins or leaves your current voice channel.", inline=False)
         embed.add_field(name="!s / !m", value="Switch between **Single Mode** (respond to all) and **Multiple Mode** (respond to name).", inline=False)
         embed.add_field(name="Other Toggles", value="---", inline=False)
-        # Fetch current state from the bot object for the help message
         ss_status = 'ON' if bot.vision_mode_enabled else 'OFF'
         yt_status = 'ON' if bot.youtube_enabled else 'OFF'
         embed.add_field(name="!ss", value=f"Toggle screen vision. (Currently: **{ss_status}**)", inline=False)
@@ -254,7 +246,6 @@ async def on_message(message: discord.Message):
                 await message.channel.send(f"The API is already running.")
             else:
                 try:
-                    # Assuming api.py is in the same directory as the old discord_bot.py
                     api_script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "api.py")
                     api_process = subprocess.Popen([sys.executable, api_script_path])
                     await message.channel.send(f"The API is **starting...**")
@@ -274,7 +265,7 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send(f"Invalid command. Usage: `!api <start|stop|status>`")
 
-
+    # --- Mode and Integration Toggles ---
     elif command == "!s": 
         config.DEFAULT_BOT_MODE = config.BOT_MODES["SINGLE"]
         await message.channel.send("Switched to **Single Mode** (will respond to all speech).")

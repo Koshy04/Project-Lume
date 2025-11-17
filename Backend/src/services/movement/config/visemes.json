@@ -1,0 +1,11 @@
+{
+  "A": { "MouthOpen": 0.4, "MouthSmile": -0.2 },
+  "B": { "MouthOpen": 0.0, "MouthSmile": 0.0 },
+  "C": { "MouthOpen": 0.6, "MouthSmile": 0.3 },
+  "D": { "MouthOpen": 0.3, "MouthSmile": 0.5 },
+  "E": { "MouthOpen": 0.8, "MouthSmile": -0.4 },
+  "F": { "MouthOpen": 0.2, "MouthSmile": 0.8 },
+  "G": { "MouthOpen": 0.5, "MouthSmile": 0.0 },
+  "H": { "MouthOpen": 0.5, "MouthSmile": -0.5 },
+  "X": { "MouthOpen": 0.1, "MouthSmile": -0.1 }
+}

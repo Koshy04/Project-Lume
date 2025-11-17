@@ -1,0 +1,333 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #0d1117; /* Very dark background */
+    color: #c9d1d9; /* Light grey text */
+    margin: 0;
+    padding: 20px;
+    transition: margin-left .5s;
+}
+
+#sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    background-color: #161b22;
+    padding-top: 60px;
+    transition: 0.5s;
+    z-index: 1;
+}
+
+#sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#sidebar a {
+    padding: 10px 15px 10px 32px;
+    text-decoration: none;
+    font-size: 22px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+#sidebar a:hover {
+    color: #f1f1f1;
+}
+
+/* Style for the active sidebar link */
+#sidebar a.active {
+    color: #ffffff;
+    background-color: #30363d;
+}
+
+/* Corrected styles for the toggle button */
+.toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2; /* Ensures it's above other content */
+    cursor: pointer;
+}
+
+.toggle-btn span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: #c9d1d9;
+    margin: 5px 0;
+}
+
+
+#main {
+    transition: margin-left .5s;
+    padding: 16px;
+    margin-left: 0;
+}
+
+.sidebar-open {
+    margin-left: 250px;
+}
+
+/* Page content will be toggled */
+.page-content {
+    display: block;
+}
+
+/* --- Layout --- */
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+header h1 {
+    text-align: center;
+    color: #58a6ff; /* A vibrant blue for titles */
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+/* --- Card styling for sections --- */
+.card {
+    background-color: #161b22; /* Dark card background */
+    border: 1px solid #30363d; /* Subtle border */
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.card h2 {
+    color: #58a6ff;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: #8b949e; /* Muted paragraph text */
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+/* --- Specific Section Styling --- */
+.engine-selectors {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.selector-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.selector-group label {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #c9d1d9;
+}
+
+select {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    padding: 10px;
+    border-radius: 6px;
+    min-width: 200px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.button-group {
+    margin-top: 20px;
+}
+
+button {
+    background-color: #238636;
+    color: #ffffff;
+    border: 1px solid #2ea043;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-right: 10px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+button:hover {
+    background-color: #2ea043;
+    border-color: #3fb950;
+}
+
+button:disabled {
+    background-color: #21262d;
+    color: #8b949e;
+    border-color: #30363d;
+    cursor: not-allowed;
+}
+
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#stop-btn {
+    background-color: #da3633;
+    border: 1px solid #f85149;
+}
+
+#stop-btn:hover {
+    background-color: #f85149;
+    border-color: #ff6a64;
+}
+
+pre#output {
+    background-color: #010409;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 15px;
+    height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #c9d1d9;
+    font-family: "SF Mono", "Consolas", "Liberation Mono", Menlo, monospace;
+    font-size: 0.85em;
+}
+
+pre#output p {
+    margin: 0;
+    line-height: 1.2;
+}
+/* Vision Page Specific Styles */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #30363d;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item label {
+    font-size: 1.1em;
+    color: #c9d1d9;
+}
+
+.setting-note {
+    font-size: 0.85em;
+    color: #8b949e;
+    margin-top: 15px;
+}
+
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #21262d;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #238636;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #238636;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.vision-feed-container {
+    margin-top: 20px;
+    background-color: #010409;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    position: relative; /* For overlay positioning */
+}
+
+#vision-feed-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    color: #8b949e;
+}
+
+/* --- Region Selection --- */
+#region-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: none; /* Hidden by default */
+    z-index: 10;
+}
+
+#selection-box {
+    position: absolute;
+    border: 2px dashed #58a6ff;
+    background-color: rgba(88, 166, 255, 0.2);
+    display: none; /* Hidden by default */
+}
+
+.region-controls {
+    margin-top: 15px;
+}

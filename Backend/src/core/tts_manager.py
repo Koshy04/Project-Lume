@@ -4,6 +4,9 @@ import importlib
 import traceback
 import asyncio
 from typing import Optional, Dict, Any, Tuple
+from src.log.custom_logger import logger
+import tempfile
+import wave
 
 class TTSManager:
     """
@@ -17,11 +20,8 @@ class TTSManager:
         self.active_engine_name = None
 
     def _discover_engines(self) -> Dict[str, Any]:
-        # ... (no changes in this method) ...
         engines = {}
-        if not os.path.exists(self.engines_dir):
-            return engines
-
+        if not os.path.exists(self.engines_dir): return engines
         for engine_name in os.listdir(self.engines_dir):
             engine_path = os.path.join(self.engines_dir, engine_name)
             if os.path.isdir(engine_path) and '__init__.py' in os.listdir(engine_path):
@@ -32,10 +32,9 @@ class TTSManager:
                     spec.loader.exec_module(module)
                     if hasattr(module, 'TTSEngine'):
                         engines[engine_name] = module.TTSEngine
-                        print(f"Discovered TTS Engine: {engine_name}")
+                        logger.info(f"Discovered TTS Engine: {engine_name}")
                 except Exception as e:
-                    print(f"Failed to load TTS engine '{engine_name}': {e}")
-                    traceback.print_exc()
+                    logger.error(f"Failed to load TTS engine '{engine_name}': {e}\n{traceback.format_exc()}")
         return engines
 
     def get_available_engines(self) -> list:
@@ -43,47 +42,33 @@ class TTSManager:
 
     async def initialize_engine(self, engine_name: str) -> bool:
         if engine_name not in self.available_engines:
-            print(f"Error: TTS engine '{engine_name}' not found.")
-            return False
-
+            logger.error(f"TTS engine '{engine_name}' not found."); return False
         if self.active_engine and self.active_engine_name == engine_name:
-            print(f"Engine '{engine_name}' is already initialized.")
-            return True
-
+            logger.info(f"TTS Engine '{engine_name}' is already initialized."); return True
         try:
-            print(f"--- Initializing TTS Engine: {engine_name} ---")
+            logger.info(f"--- Initializing TTS Engine: {engine_name} ---")
             EngineClass = self.available_engines[engine_name]
             self.active_engine = EngineClass()
-            
             initialization_success = await self.loop.run_in_executor(None, self.active_engine.initialize)
-            
             if initialization_success:
                 self.active_engine_name = engine_name
-                print(f"--- TTS Engine '{engine_name}' Initialized Successfully ---")
+                logger.info(f"--- TTS Engine '{engine_name}' Initialized Successfully ---")
                 return True
             else:
-                print(f"!!! FATAL: Failed to initialize TTS engine '{engine_name}'.")
-                self.active_engine = None
-                return False
-
+                logger.critical(f"Failed to initialize TTS engine '{engine_name}'.")
+                self.active_engine = None; return False
         except Exception as e:
-            print(f"\n" + "="*50)
-            print(f"!!! [TTS_MANAGER] FATAL INITIALIZATION ERROR for engine '{engine_name}' !!!")
-            print(f"Error Details: {e}")
-            traceback.print_exc()
-            print("="*50 + "\n")
-            self.active_engine = None
-            return False
+            logger.critical(f"FATAL INITIALIZATION ERROR for TTS engine '{engine_name}': {e}\n{traceback.format_exc()}")
+            self.active_engine = None; return False
 
-    def start_audio_generation(self, text: str) -> Tuple[asyncio.Task, asyncio.Queue]:
+    async def generate_tts_file(self, text: str) -> str | None:
         """
-        Starts the TTS generation in a background thread and returns the task and queue.
-        This does NOT wait for the audio. It returns immediately.
+        Generates TTS audio and saves it to a temporary WAV file.
+        Returns the path to the file, or None on failure.
         """
         if not self.active_engine:
-            print("[Warning] TTS generation called but no engine is active.")
-            async def dummy_task(): pass
-            return asyncio.create_task(dummy_task()), asyncio.Queue()
+            logger.warning("TTS generation called but no engine is active.")
+            return None
 
         audio_data_queue = asyncio.Queue()
         
@@ -94,5 +79,55 @@ class TTSManager:
             audio_data_queue, 
             self.loop
         )
+
+        # Collect all audio chunks from the queue
+        all_audio_data = []
+        samplerate = None
+        while True:
+            try:
+                item = await asyncio.wait_for(audio_data_queue.get(), timeout=180.0)
+                if item is None: break # End of stream
+                if isinstance(item, Exception):
+                    logger.error(f"TTS producer failed: {item}"); return None
+                
+                # The first item should contain the samplerate
+                if samplerate is None:
+                    samplerate = item[0]
+                all_audio_data.append(item[1])
+            except asyncio.TimeoutError:
+                logger.error("TTS generation timed out."); return None
         
-        return producer_task, audio_data_queue
+        await producer_task
+
+        if not all_audio_data or not samplerate:
+            logger.error("No audio data was generated by the TTS engine.")
+            return None
+
+        # Combine all audio chunks and save to a temporary WAV file
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+                wav_path = f.name
+            
+            with wave.open(wav_path, 'wb') as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2) # Assuming 16-bit audio
+                wf.setframerate(samplerate)
+                for chunk in all_audio_data:
+                    wf.writeframes(chunk)
+            
+            logger.info(f"TTS audio successfully saved to temporary file: {wav_path}")
+            return wav_path
+        except Exception as e:
+            logger.error(f"Failed to save TTS audio to temporary file: {e}")
+            return None
+
+    async def shutdown(self):
+        if self.active_engine and hasattr(self.active_engine, 'unload'):
+            logger.info(f"Shutting down TTS engine: {self.active_engine_name}")
+            try:
+                await self.loop.run_in_executor(None, self.active_engine.unload)
+                logger.info(f"TTS engine '{self.active_engine_name}' shut down successfully.")
+            except Exception as e:
+                logger.error(f"Error shutting down TTS engine '{self.active_engine_name}': {e}")
+        self.active_engine = None
+        self.active_engine_name = None
